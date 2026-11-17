@@ -1,0 +1,502 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lerninterface Prototyp</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: Hintergrundbild als unterste Ebene, helle Karten darüber, ein Hauptbereich, Kanäle oben, Tempo/Start unten.
+   Bewusst nur ein heller Look: Der Hintergrund ist ein Bild. */
+:root{
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --ink:#14224A; --sub:#3C4B73; --pri:#2F5FD9; --pri2:#4A85F4; --priDeep:#2447B8;
+  --soft:#E3EBFF; --softer:#EEF3FF; --line:#B9C6EA;
+  --card:rgba(255,255,255,.93); --cardEdge:rgba(255,255,255,.9);
+  --ok:#15803D; --okSoft:#E3F4E9; --acc:#F59B4B; --accSoft:#FFEBD8; --accDeep:#C2410C;
+  --bad:#B4281B; --badSoft:#FDE4E0;
+  --shadow:rgba(60,90,200,.08); --focus:#14224A;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{background:#EAF0FF}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--font);line-height:1.45;
+  background:linear-gradient(rgba(246,249,255,.62),rgba(246,249,255,.62)),url(bg.jpg) center/cover fixed no-repeat,#EAF0FF;
+  padding-block:22px 44px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#view{display:flex;flex-direction:column;gap:18px}
+.app{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:12px}
+h1{font-size:clamp(24px,4.6vw,34px);font-weight:800;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;font-weight:700;margin:0}
+h3{font-size:16px;font-weight:700;margin:0;display:flex;align-items:center;gap:8px}
+h3 svg{width:20px;height:20px;color:var(--pri)}
+p{margin:0}
+.sub{color:var(--sub);font-size:15px}
+.top{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:center}
+.top .ttl{flex:1;min-width:200px;padding-left:4px}
+.circ{width:52px;height:52px;border-radius:50%;border:0;background:rgba(255,255,255,.92);box-shadow:0 2px 8px var(--shadow);display:grid;place-items:center;color:var(--ink);flex:none}
+.circ svg{width:24px;height:24px}
+.circ.mini{width:44px;height:44px;border:2px solid var(--line);box-shadow:none;background:#fff;color:var(--pri)}
+.circ.mini svg{width:20px;height:20px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.92);border:0;box-shadow:0 2px 8px var(--shadow);border-radius:999px;padding:7px 8px 7px 14px;min-height:48px;font-weight:600;font-size:16px}
+.chip svg{width:22px;height:22px;color:var(--pri)}
+.chip .st{border-radius:999px;padding:4px 12px;font-size:14px;font-weight:700;background:var(--ok);color:#fff}
+.chip[aria-pressed="false"] svg{color:var(--sub)}
+.chip[aria-pressed="false"] .st{background:#E1E6F2;color:var(--sub)}
+.chip[disabled]{cursor:default}
+.nav{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.tab{flex:none;border:0;background:rgba(255,255,255,.7);padding:10px 18px;border-radius:999px;font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center;color:var(--sub)}
+.tab svg{width:18px;height:18px}
+.tab[aria-selected="true"]{background:#fff;color:var(--priDeep);box-shadow:0 2px 10px var(--shadow);font-weight:700}
+.card{background:var(--card);border:1px solid var(--cardEdge);border-radius:28px;padding:22px 24px;box-shadow:0 2px 14px var(--shadow);display:flex;flex-direction:column;gap:14px;min-width:0}
+.ibox{width:52px;height:52px;border-radius:16px;background:var(--soft);display:grid;place-items:center;flex:none;color:var(--pri)}
+.ibox svg{width:28px;height:28px}
+.head{display:flex;align-items:center;gap:14px}
+.head .grow{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:20px;align-items:start}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+@media (max-width:880px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.cards3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:0 26px;min-height:62px;font-weight:700;font-size:19px;border:2px solid var(--pri);background:rgba(255,255,255,.92);color:var(--priDeep)}
+.btn.pri{background:linear-gradient(180deg,var(--pri2),#3A6FE8);color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(47,95,217,.2)}
+.btn.pri.big{min-height:68px;font-size:22px;padding:0 40px}
+.btn svg{width:22px;height:22px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.badge{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:700}
+.b-ok{background:var(--okSoft);color:var(--ok)}.b-early{background:var(--accSoft);color:var(--accDeep)}.b-miss{background:var(--badSoft);color:var(--bad)}.b-idle{background:var(--softer);color:var(--sub)}
+.badge svg{width:15px;height:15px}
+/* Maskottchen */
+.mrow{display:flex;align-items:center;gap:6px;min-height:104px}
+.mrow.hide{display:none}
+.mimg{width:104px;height:auto;flex:none;transform-origin:50% 90%}
+.bubble{position:relative;background:#fff;border:1px solid var(--cardEdge);box-shadow:0 2px 12px var(--shadow);border-radius:22px;padding:14px 20px;font-weight:600;font-size:17px;max-width:460px}
+.bubble::before{content:'';position:absolute;left:-9px;top:50%;margin-top:-9px;width:18px;height:18px;background:#fff;transform:rotate(45deg);border-radius:3px}
+.m-happy .mimg{animation:hop .7s 2}
+.m-think .mimg{transform:rotate(-6deg)}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px)}}
+@media (prefers-reduced-motion:reduce){.m-happy .mimg{animation:none}}
+@media (max-width:520px){.mimg{width:76px}.mrow{min-height:80px}.bubble{font-size:16px;padding:12px 16px}}
+/* Spur */
+.beats,.track,.vibrow,.tiprow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));position:relative}
+.beats span{text-align:center;font-size:14px;font-weight:600;color:var(--sub);padding-bottom:4px}
+.beats span.on{color:var(--accDeep);font-weight:800}
+.track{min-height:92px;align-items:stretch}
+.seg{margin:0 3px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:14px;transition:background .1s}
+.seg svg{width:26px;height:26px}
+.seg.block{background:linear-gradient(180deg,var(--pri2),#3A6FE8);color:#fff;box-shadow:0 4px 10px rgba(47,95,217,.18)}
+.seg.pause{border:2px dashed #9FB3E6;background:#EEF3FF;color:var(--sub);font-weight:500}
+.seg.hit{background:var(--acc);color:#fff;box-shadow:0 0 0 5px var(--accSoft)}
+.nov .seg.block{background:var(--soft);color:var(--sub);box-shadow:none}
+.marker{position:absolute;top:-6px;bottom:-6px;width:4px;margin-left:-2px;border-radius:2px;background:var(--accDeep);pointer-events:none;left:0}
+.marker::before{content:'jetzt';position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:var(--accDeep);color:#fff;border-radius:999px;font-size:14px;font-weight:700;padding:3px 12px}
+.vibrow .cellv{display:grid;place-items:center;height:38px;color:var(--pri)}
+.vibrow svg{width:26px;height:26px}
+.vibrow .pulse svg{animation:shake .25s 2;color:var(--accDeep)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.vibrow .pulse svg{animation:none}.seg{transition:none}}
+.tiprow{min-height:38px}
+.tiprow .tc{display:grid;place-items:center}
+.lead{font-weight:800;font-size:44px;color:var(--pri);text-align:center;min-height:54px}
+.tapcard{align-items:center;text-align:center;justify-content:center;gap:10px;padding-block:28px}
+.tapbtn{width:148px;height:148px;border-radius:50%;border:0;background:linear-gradient(180deg,var(--pri2),#3A6FE8);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 16px var(--soft),0 0 0 30px var(--softer),0 12px 24px rgba(47,95,217,.22);touch-action:manipulation;user-select:none;-webkit-user-select:none;margin:34px 0 34px}
+.tapbtn svg{width:62px;height:62px}
+.tapbtn:active,.tapbtn.down{transform:scale(.96)}
+.tapbtn[disabled]{opacity:.45;cursor:not-allowed}
+.fb{display:flex;align-items:center;gap:14px;background:var(--okSoft);border-radius:20px;padding:12px 16px;min-height:76px;text-align:left}
+.fb .ico{width:44px;height:44px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;flex:none}
+.fb .ico svg{width:24px;height:24px}
+.fb .t{font-weight:800;font-size:18px}
+.fb.early{background:var(--accSoft)}.fb.early .ico{background:var(--accDeep)}
+.fb.idle{background:var(--softer)}.fb.idle .ico{background:var(--pri)}
+.bottom{display:flex;flex-wrap:wrap;gap:16px;align-items:stretch}
+.prog{flex:2.3 1 260px;background:var(--card);border:1px solid var(--cardEdge);border-radius:28px;padding:16px 24px;box-shadow:0 2px 14px var(--shadow);display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0}
+.prog .lab{font-weight:700;font-size:15px}
+.prog .big{font-weight:800;font-size:30px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dots{display:flex;gap:8px}
+.dots i{width:16px;height:16px;border-radius:50%;background:#DDE4F5}
+.dots i.on{background:var(--pri)}
+.dots i.cur{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--pri)}
+.bottom .btn{flex:0 1 190px}
+.bottom .btn.pri{flex:0 1 230px}
+input[type=range]{accent-color:var(--pri);height:28px;min-width:100px;width:100%}
+.sl{display:flex;align-items:center;gap:12px}
+.sl input{flex:1}
+.bigv{font-weight:800;font-size:44px;color:var(--ink);line-height:1}
+.val{font-weight:700;white-space:nowrap}
+/* Dynamik */
+.circles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:end;min-height:210px}
+.ci{display:flex;flex-direction:column;align-items:center;gap:8px}
+.dot{border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--pri2),var(--pri));transition:box-shadow .15s}
+.ci.cur .dot{box-shadow:0 0 0 6px var(--accSoft),0 0 0 10px var(--acc)}
+.ci .lv{font-size:14px;font-weight:700;color:var(--sub);text-align:center}
+.ci.cur .lv{color:var(--accDeep)}
+.sigs{display:flex;gap:3px;align-items:flex-end;height:30px}
+.sigs i{display:block;width:6px;border-radius:2px;background:var(--line)}
+.sigs i.on{background:var(--pri)}
+.ring{width:100%;height:12px;border-radius:999px;background:var(--soft);overflow:hidden}
+.ring i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pri2),var(--pri))}
+/* Einstellungen, Listen */
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.opt{display:flex;flex-direction:column;gap:6px}
+.opt .line{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sw{position:relative;width:64px;height:36px;border-radius:18px;border:0;background:#B6C0D9;flex:none}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s}
+.sw[aria-checked="true"]{background:var(--ok)}
+.sw[aria-checked="true"]::after{left:31px}
+select{font:inherit;color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px;min-height:44px}
+.pat{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.pcell{height:56px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:700;color:var(--sub);font-size:14px}
+.pcell[data-s="X"]{background:var(--pri);color:#fff;border-color:var(--pri)}
+.pcell[data-s="o"]{background:var(--soft);color:var(--pri);border-color:var(--pri)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #DCE3F5;vertical-align:top}
+.wrapx{overflow-x:auto}
+details{background:var(--softer);border-radius:16px;padding:12px 16px}
+summary{cursor:pointer;font-weight:700}
+.levels{display:flex;flex-wrap:wrap;gap:8px}
+.lvbtn{border:2px solid transparent;background:rgba(255,255,255,.85);border-radius:999px;padding:9px 18px;font-weight:700;font-size:15px;min-height:44px}
+.lvbtn[aria-pressed="true"]{border-color:var(--pri);background:#fff;color:var(--priDeep)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-weight:600;z-index:20;max-width:calc(100vw - 32px);text-align:center}
+.note{background:rgba(255,255,255,.85);border-radius:20px;padding:12px 18px;font-size:15px;color:var(--sub)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:0;padding:0;list-style:none}
+.steps li{display:flex;gap:12px;align-items:flex-start}
+.steps .ibox{width:44px;height:44px;border-radius:14px}
+.steps .ibox svg{width:24px;height:24px}
+.foot{font-size:13px;color:var(--sub);text-align:center}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></g></symbol>
+<symbol id="i-tap" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></g></symbol>
+<symbol id="i-vib" viewBox="0 0 24 24"><path d="M4 10v4M8 6v12M12 3v18M16 6v12M20 10v4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="18" rx="2"/><path d="M4 8v8M20 8v8"/></g></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></g></symbol>
+<symbol id="i-compass" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8l-2 6-6 2 2-6z"/></g></symbol>
+<symbol id="i-note" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></g></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></g></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+<symbol id="i-drum" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="8" ry="3"/><path d="M4 12v5c0 1.7 3.6 3 8 3s8-1.3 8-3v-5M9 15v4M15 15v4M8 4l3 5M16 4l-3 5"/></g></symbol>
+<symbol id="i-timer" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M9 2.5h6M12 2.5v3"/></g></symbol>
+<symbol id="i-hand" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5a1.5 1.5 0 0 1 3 0v6M12 10V4a1.5 1.5 0 0 1 3 0v7M15 11V6a1.5 1.5 0 0 1 3 0v8c0 4-2.5 7-6.5 7S6 18.5 5 15l-1-3a1.5 1.5 0 0 1 2.8-1L9 14"/></g></symbol>
+</defs></svg>
+
+<div class="app">
+  <header class="top">
+    <button class="circ" id="homeBtn" aria-label="Zurück zum Start"><svg><use href="#i-back"/></svg></button>
+    <div class="ttl"><h1 id="ttl">Lerninterface</h1></div>
+    <div class="chips" id="chips" role="group" aria-label="Kanäle"></div>
+    <button class="circ" id="gearBtn" aria-label="Einstellungen"><svg><use href="#i-gear"/></svg></button>
+  </header>
+  <nav class="nav" role="tablist" aria-label="Bereiche" id="nav"></nav>
+  <main id="view"></main>
+  <p class="foot">Klickbarer Konzept-Prototyp zur Arbeit „Konzeption eines inklusiven multimodalen Lerninterfaces“. Er wurde nicht mit gehörlosen oder schwerhörigen Lernenden getestet. Die Zuordnungen sind Vorschläge.</p>
+</div>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const ic=(n,c='')=>`<svg class="${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const RH_LEVELS=[
+  {name:'Stufe 1',desc:'Gleichmäßig: kurz, Pause, kurz, Pause',pat:'X.X.X.X.',bpm:60},
+  {name:'Stufe 2',desc:'Lang und kurz im Wechsel',pat:'XoXoX.X.',bpm:66},
+  {name:'Stufe 3',desc:'Lang, kurz, Pause, kurz, Pause, lang',pat:'XoX.X.Xo',bpm:72},
+  {name:'Stufe 4',desc:'Dichter: mehr Schläge hintereinander',pat:'XXX.XoXX',bpm:72}
+];
+const TITLES={home:'Willkommen',rhythm:'Rhythmus und Tempo',dyn:'Dynamik',explore:'Erkunden',teacher:'Lehrkraft',settings:'Einstellungen'};
+const S={view:'home',ch:{see:true,tap:true,vib:true},reduce:false,rstage:0,vibInt:3,mascot:true,map:'both',
+  level:0,pat:RH_LEVELS[0].pat,bpm:RH_LEVELS[0].bpm,cycles:1,dyn:[1,3,5,3,1],
+  done:[false,false,false,false],run:null,last:null};
+try{const m=JSON.parse(localStorage.getItem('lp_done')||'null');if(Array.isArray(m)&&m.length===4)S.done=m.map(Boolean)}catch(e){}
+function saveDone(){try{localStorage.setItem('lp_done',JSON.stringify(S.done))}catch(e){}}
+function eff(){ // wirksame Kanäle (Reduktionsmodus: Sehen -> Tippen -> Vibration)
+  if(!S.reduce) return S.ch;
+  return {see:true,tap:S.rstage>=1&&S.ch.tap,vib:S.rstage>=2&&S.ch.vib};
+}
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;d.setAttribute('role','status');document.body.appendChild(d);setTimeout(()=>d.remove(),2400)}
+function vibrate(level){ // Stufe 1..5 -> Dauer; nur wenn das Gerät es kann
+  if(!eff().vib) return;
+  const ms=Math.round((12+level*16)*(0.5+S.vibInt*0.25));
+  try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}
+}
+const canVib=()=>{try{return !!navigator.vibrate}catch(e){return false}};
+
+/* ---------- Maskottchen (optional, nur Bild und Text) ---------- */
+function mascotHTML(text,mood){
+  return `<div class="mrow m-${mood||'idle'} ${S.mascot?'':'hide'}" id="mrow"><img class="mimg" src="mascot.png" alt="Maskottchen" width="104"><div class="bubble" id="mtext">${text}</div></div>`;
+}
+function setM(text,mood){const m=$('#mrow');if(!m)return;m.className='mrow m-'+(mood||'idle')+(S.mascot?'':' hide');const t=$('#mtext');if(t)t.textContent=text}
+function fbHTML(kind,title,text){
+  const icon=kind==='early'?'back':kind==='idle'?'play':'check';
+  return `<div class="fb ${kind}" id="fb" role="status" aria-live="polite"><span class="ico">${ic(icon)}</span><div><div class="t">${title}</div><div class="sub">${text}</div></div></div>`;
+}
+function setFb(kind,title,text,mood){const e=$('#fb');if(e)e.outerHTML=fbHTML(kind,title,text);setM(title,mood)}
+
+/* ---------- Muster ---------- */
+function parse(p){const segs=[];let i=0;while(i<8){const c=p[i];if(c==='X'){let l=1;while(p[i+l]==='o')l++;segs.push({b:1,l,s:i});i+=l}else{let l=1;while(i+l<8&&p[i+l]!=='X'){l++}segs.push({b:0,l,s:i});i+=l}}return segs}
+function onsets(p){const a=[];for(let i=0;i<8;i++)if(p[i]==='X')a.push(i);return a}
+function sanitize(p){let o='',prev='.';for(let i=0;i<8;i++){let c=p[i]||'.';if(c==='o'&&prev==='.')c='.';o+=c;prev=c}return o}
+
+/* ---------- Kopfzeile ---------- */
+function renderChips(){
+  const e=eff(),el=$('#chips');
+  const defs=[['see','eye','Sehen'],['tap','tap','Tippen'],['vib','vib','Vibration']];
+  el.innerHTML=defs.map(([k,i,l])=>{const on=e[k];const lock=S.reduce&&!e[k]&&S.ch[k];
+    return `<button class="chip" data-k="${k}" aria-pressed="${on}" ${k==='see'&&S.reduce?'disabled':''} title="${lock?'Wird im Reduktionsmodus später zugeschaltet':''}">${ic(i)}${l}<span class="st">${on?'An':(lock?'bald':'Aus')}</span></button>`}).join('');
+  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(S.run)return toast('Bitte erst anhalten');S.ch[k]=!S.ch[k];renderChips();if(S.view==='rhythm')renderRhythmChannels();syncVibSwitch();toast((k==='see'?'Sehen':k==='tap'?'Tippen':'Vibration')+(S.ch[k]?': an':': aus'))});
+}
+const NAV=[['home','home','Start'],['rhythm','note','Rhythmus und Tempo'],['dyn','vib','Dynamik'],['explore','compass','Erkunden'],['teacher','user','Lehrkraft'],['settings','gear','Einstellungen']];
+function renderNav(){
+  const n=$('#nav');
+  n.innerHTML=NAV.map(([k,i,l])=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${S.view===k}">${ic(i)}${l}</button>`).join('');
+  n.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.k));
+}
+function go(v){stopAll();S.view=v;$('#ttl').textContent=TITLES[v];renderNav();renderChips();({home:viewHome,rhythm:viewRhythm,dyn:viewDyn,explore:viewExplore,teacher:viewTeacher,settings:viewSettings})[v]();window.scrollTo({top:0})}
+$('#homeBtn').onclick=()=>go('home');$('#gearBtn').onclick=()=>go('settings');
+
+/* ---------- Start ---------- */
+function viewHome(){
+  $('#view').innerHTML=`${mascotHTML('Hallo! Heute üben wir gemeinsam den Rhythmus!','happy')}
+  <div class="cards3">
+  <section class="card"><div class="head"><div class="ibox">${ic('note')}</div><h2>Rhythmus und Tempo</h2></div><p class="sub">Du siehst Blöcke und einen Marker. Lange Blöcke dauern länger, Lücken sind Pausen. Tippe, wenn ein Block den Marker erreicht.</p><button class="btn pri" data-go="rhythm">${ic('play')}Üben</button></section>
+  <section class="card"><div class="head"><div class="ibox">${ic('vib')}</div><h2>Dynamik</h2></div><p class="sub">Kreise zeigen die Stärke: klein und blass ist leise, groß und kräftig ist laut. Drücke kurz für leise und lange für laut.</p><button class="btn pri" data-go="dyn">${ic('play')}Üben</button></section>
+  <section class="card"><div class="head"><div class="ibox">${ic('compass')}</div><h2>Erkunden</h2></div><p class="sub">Probiere alles aus, ohne Aufgabe und ohne Bewertung. Sieh, wie Blöcke, Kreise und Vibration zusammengehören.</p><button class="btn" data-go="explore">${ic('compass')}Erkunden</button></section></div>
+  <section class="card"><h2>So funktioniert es</h2>
+  <ol class="steps"><li><span class="ibox">${ic('eye')}</span><div><b>Sehen</b><div class="sub">Der Grundkanal. Er zeigt Blöcke, Marker und Kreise.</div></div></li><li><span class="ibox">${ic('tap')}</span><div><b>Tippen</b><div class="sub">Du antwortest mit dem großen runden Knopf.</div></div></li><li><span class="ibox">${ic('vib')}</span><div><b>Vibration</b><div class="sub">Impulse auf dem Gerät. Schalte sie oben an oder aus.</div></div></li></ol>
+  <p class="sub">Alle Anweisungen sind Text und Symbole. Es gibt keinen Ton. Im <b>Reduktionsmodus</b> (Einstellungen) beginnst du nur mit Sehen. Weitere Kanäle kommen nach und nach dazu. Die <b>Lehrkraft-Ansicht</b> legt Muster und Tempo fest.</p>
+  <details><summary>Begriffe (Arbeitsdefinitionen)</summary><p class="sub" style="margin-top:8px"><b>Rhythmus:</b> zeitliche Anordnung von Tönen und Pausen. <b>Tempo:</b> Geschwindigkeit der Ausführung, hier in Schlägen pro Minute. <b>Dynamik:</b> Lautstärke und ihre Abstufungen.</p></details></section>`;
+  $('#view').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+}
+
+/* ---------- Rhythmus ---------- */
+function rhythmTrackHTML(p){
+  return parse(p).map(s=>`<div class="seg ${s.b?'block':'pause'}" style="grid-column:span ${s.l}" data-s="${s.s}">${s.b?ic('drum')+(s.l>1?'lang':'kurz'):'Pause'}</div>`).join('');
+}
+function vibRowHTML(p){const on=onsets(p);let h='';for(let i=0;i<8;i++)h+=`<div class="cellv" data-i="${i}">${on.includes(i)?ic('vib'):''}</div>`;return h}
+function progressHTML(){
+  const n=S.done.filter(Boolean).length;
+  return `<div class="lab">Dein Fortschritt</div><div class="big">${n} / 4<span class="dots" aria-hidden="true">${S.done.map((d,i)=>`<i class="${d?'on':''} ${i===S.level?'cur':''}"></i>`).join('')}</span></div>`;
+}
+function renderProgress(){const p=$('#prog');if(p)p.innerHTML=progressHTML()}
+function viewRhythm(){
+  const L=RH_LEVELS,sameAsLevel=S.pat===L[S.level].pat;
+  $('#view').innerHTML=`
+  ${mascotHTML('Hallo! Heute üben wir gemeinsam den Rhythmus!','idle')}
+  <div class="levels" id="levels" role="group" aria-label="Stufen">${L.map((l,i)=>`<button class="lvbtn" data-i="${i}" aria-pressed="${S.level===i&&sameAsLevel}">${l.name}</button>`).join('')}<button class="lvbtn" id="custom" aria-pressed="${!sameAsLevel}">Muster der Lehrkraft</button></div>
+  <div class="grid2">
+    <section class="card" id="patcard"><div class="head"><div class="ibox">${ic('note')}</div><div class="grow"><h2>Deine Aufgabe</h2><p class="sub" id="levdesc">${sameAsLevel?L[S.level].desc:'Muster aus der Lehrkraft-Ansicht'}</p></div></div>
+      <div style="height:22px"></div>
+      <div class="beats" id="beats">${[1,2,3,4,5,6,7,8].map(n=>`<span>${n}</span>`).join('')}</div>
+      <div style="position:relative"><div class="track" id="track">${rhythmTrackHTML(S.pat)}</div><div class="marker" id="mk" hidden></div></div>
+      <h3 id="vh">${ic('phone')}Vibration: ein Impuls je Block</h3><div class="vibrow" id="vibrow">${vibRowHTML(S.pat)}</div>
+      <h3>${ic('tap')}Dein Tipp</h3><div class="tiprow" id="tiprow"></div>
+      <div id="lead" class="lead" aria-live="polite"></div>
+      <div id="fbwrap">${fbHTML('idle','Bereit','Drücke Start. Vier Punkte zählen vor. Tippe, wenn ein blauer Block den Marker erreicht.')}</div>
+    </section>
+    <div class="col">
+      <section class="card"><div class="head"><div class="ibox">${ic('timer')}</div><div class="grow"><h2>Tempo</h2><p class="sub">Schläge pro Minute</p></div><span class="bigv" id="bpmv">${S.bpm}</span></div>
+        <div class="sl"><button class="circ mini" id="slow" aria-label="Langsamer">${ic('minus')}</button><input type="range" id="bpm" min="40" max="120" step="2" value="${S.bpm}" aria-label="Tempo"><button class="circ mini" id="fast" aria-label="Schneller">${ic('plus')}</button></div></section>
+      <section class="card" style="flex-direction:row;align-items:center"><div class="ibox">${ic('phone')}</div><div class="grow" style="flex:1"><h2 style="font-size:18px">Vibration dazuschalten</h2><p class="sub">${canVib()?'Du spürst jeden Schlag.':'Dieses Gerät vibriert nicht. Du siehst die Impulse als Symbol.'}</p></div><button class="sw" id="vsw" role="switch" aria-label="Vibration" aria-checked="${S.ch.vib}"></button></section>
+      <section class="card tapcard" id="tapcard"><button class="tapbtn" id="tap" aria-label="Tippen im Takt">${ic('hand')}</button><h2>Tippe im Takt</h2><p class="sub">Auch mit der Leertaste.</p></section>
+    </div>
+  </div>
+  <div class="bottom"><div class="prog" id="prog">${progressHTML()}</div><button class="btn" id="todyn">Dynamik</button><button class="btn pri big" id="start">${ic('play')}Start</button></div>`;
+  $('#levels').querySelectorAll('.lvbtn[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;S.level=i;S.pat=L[i].pat;S.bpm=L[i].bpm;viewRhythm()});
+  $('#custom').onclick=()=>toast('Das Muster legst du in der Lehrkraft-Ansicht fest');
+  const setBpm=v=>{S.bpm=Math.max(40,Math.min(120,v));$('#bpm').value=S.bpm;$('#bpmv').textContent=S.bpm};
+  $('#bpm').oninput=e=>setBpm(+e.target.value);$('#slow').onclick=()=>setBpm(S.bpm-4);$('#fast').onclick=()=>setBpm(S.bpm+4);
+  $('#todyn').onclick=()=>go('dyn');
+  $('#vsw').onclick=()=>{if(S.run)return toast('Bitte erst anhalten');S.ch.vib=!S.ch.vib;renderChips();renderRhythmChannels();syncVibSwitch()};
+  $('#start').onclick=()=>S.run?stopAll():startRhythm();
+  const tp=$('#tap');tp.addEventListener('pointerdown',e=>{e.preventDefault();rhythmTap()});
+  renderRhythmChannels();
+}
+function syncVibSwitch(){const s=$('#vsw');if(s)s.setAttribute('aria-checked',String(S.ch.vib))}
+function renderRhythmChannels(){
+  const e=eff();const t=$('#track');if(!t)return;
+  $('#patcard').classList.toggle('nov',!e.see);
+  const b=$('#tap');if(b){b.disabled=!e.tap}
+  const vr=$('#vibrow'),vh=$('#vh');if(vr)vr.style.visibility=e.vib?'visible':'hidden';if(vh)vh.style.visibility=e.vib?'visible':'hidden';
+}
+function startRhythm(){
+  const beat=60000/S.bpm,p=S.pat,on=onsets(p),cyc=S.cycles,total=8*cyc;
+  const run={kind:'rh',beat,on,cyc,total,t0:performance.now()+4*beat,fired:new Set(),match:new Map(),extra:0,raf:0};
+  S.run=run;$('#start').innerHTML=ic('stop')+'Anhalten';$('#tiprow').innerHTML='';$('#mk').hidden=false;try{document.activeElement.blur()}catch(e){}
+  setFb('idle','Los geht es','Schau auf den Marker. Tippe, wenn ein Block ihn erreicht.','idle');
+  const e=eff();
+  const loop=()=>{
+    if(S.run!==run)return;const rel=(performance.now()-run.t0)/beat;
+    const lead=$('#lead');
+    if(rel<0){const n=Math.ceil(-rel);if(lead)lead.textContent=e.see?('● '.repeat(5-n).trim()||'')+'  '+n:'';$('#mk').style.left='0%'}
+    else{if(lead)lead.textContent='';$('#mk').style.left=(((rel%8)/8)*100)+'%'}
+    const bi=Math.floor(((rel%8)+8)%8);document.querySelectorAll('#beats span').forEach((s,i)=>s.classList.toggle('on',rel>=0&&i===bi));
+    for(let c=0;c<cyc;c++)for(const o of on){const idx=c*8+o;if(!run.fired.has(idx)&&rel>=idx){run.fired.add(idx);pulseAt(o)}}
+    if(rel>=total+0.6){finishRhythm(run);return}
+    run.raf=requestAnimationFrame(loop);
+  };
+  run.raf=requestAnimationFrame(loop);
+}
+function pulseAt(o){
+  document.querySelectorAll('#track .seg.block').forEach(s=>{if(+s.dataset.s===o){s.classList.add('hit');setTimeout(()=>s.classList.remove('hit'),200)}});
+  const c=document.querySelector(`#vibrow .cellv[data-i="${o}"]`);if(c){c.classList.add('pulse');setTimeout(()=>c.classList.remove('pulse'),520)}
+  vibrate(3);
+}
+function rhythmTap(){
+  const r=S.run;if(!r||r.kind!=='rh'||!eff().tap)return;
+  const rel=(performance.now()-r.t0)/r.beat;
+  let best=null,bd=9;for(let c=0;c<r.cyc;c++)for(const o of r.on){const idx=c*8+o;if(r.match.has(idx))continue;const d=rel-idx;if(Math.abs(d)<Math.abs(bd)){bd=d;best=idx}}
+  if(best===null||Math.abs(bd)>0.6){r.extra++;setFb('idle','Zusätzlicher Tipp','Hier ist gerade kein Block.','think');return}
+  const tol=0.25;const kind=bd<-tol?'early':bd>tol?'late':'ok';r.match.set(best,{kind,d:bd});
+  const col=best%8;
+  const tc=document.createElement('div');tc.className='tc';tc.style.gridColumn=(col+1);
+  tc.innerHTML=kind==='ok'?`<span class="badge b-ok">${ic('check')}passt</span>`:`<span class="badge b-early">${kind==='early'?'zu früh':'zu spät'}</span>`;
+  const tr=$('#tiprow');if(Math.floor(best/8)!==r.lastCycle){tr.innerHTML='';r.lastCycle=Math.floor(best/8)}tr.appendChild(tc);
+  if(kind==='ok')setFb('','Passt!','Dein Tipp war im Takt.','happy');else setFb('early',kind==='early'?'Etwas zu früh':'Etwas zu spät',kind==='early'?'Warte, bis der Marker den Block erreicht.':'Tippe ein bisschen eher.','think');
+}
+function finishRhythm(run){
+  S.run=null;cancelAnimationFrame(run.raf);$('#mk').hidden=true;$('#start').innerHTML=ic('play')+'Start';
+  document.querySelectorAll('#beats span').forEach(s=>s.classList.remove('on'));
+  const n=run.on.length*run.cyc;let ok=0,early=0,late=0;run.match.forEach(v=>{if(v.kind==='ok')ok++;else if(v.kind==='early')early++;else late++});const miss=n-run.match.size;
+  const pct=n?Math.round(ok/n*100):0;S.last={kind:'rh',ok,n,pct};
+  const tapOn=eff().tap;
+  const txt=tapOn?`${ok} von ${n} Schlägen im Takt. Zu früh: ${early}. Zu spät: ${late}. Verpasst: ${miss}.`:'Du hast zugeschaut und gespürt. Schalte Tippen an, um mitzumachen.';
+  let extra='';
+  if(tapOn&&pct>=75){
+    if(S.pat===RH_LEVELS[S.level].pat&&!S.done[S.level]){S.done[S.level]=true;saveDone();extra=' Stufe geschafft.'}
+    if(S.reduce&&S.rstage<2){S.rstage++;extra+=' Neuer Kanal zugeschaltet: '+(S.rstage===1?'Tippen':'Vibration')+'.';renderChips();renderRhythmChannels()}
+  }
+  renderProgress();
+  setFb(tapOn?(pct>=75?'':'early'):'idle',tapOn?(pct>=75?'Gut gemacht!':'Weiter üben'):'Fertig',txt+extra,pct>=75&&tapOn?'happy':'idle');
+}
+
+/* ---------- Dynamik ---------- */
+function dotStyle(level){
+  const size=34+level*18;const m=S.map;
+  const bright=m==='size'?1:(.45+level*.11);const sz=m==='bright'?66:size;
+  return `width:${sz}px;height:${sz}px;opacity:${bright.toFixed(2)}`;
+}
+const LVN=['','sehr leise','leise','mittel','laut','sehr laut'];
+function sigs(l){return `<div class="sigs" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i class="${i<=l?'on':''}" style="height:${6+i*5}px"></i>`).join('')}</div>`}
+function viewDyn(){
+  $('#view').innerHTML=`${mascotHTML('Zeig mir, wie stark der Kreis ist!','idle')}
+  <div class="grid2"><section class="card"><div class="head"><div class="ibox">${ic('vib')}</div><div class="grow"><h2>Deine Aufgabe</h2><p class="sub">Zeige die Stärke des hervorgehobenen Kreises: kurz drücken ist leise, lange drücken ist laut.</p></div><span class="badge b-idle" id="dstep">0 / ${S.dyn.length}</span></div>
+  <div class="circles" id="circles">${S.dyn.map((l,i)=>`<div class="ci" data-i="${i}"><div class="dot" style="${dotStyle(l)}"></div>${sigs(l)}<span class="lv">${LVN[l]}</span></div>`).join('')}</div>
+  <div class="lead" id="lead"></div><div class="row" id="dres"></div>
+  <div id="fbwrap">${fbHTML('idle','Bereit','Drücke Start. Jeder Kreis kommt kurz an die Reihe.')}</div></section>
+  <div class="col"><section class="card"><div class="head"><div class="ibox">${ic('phone')}</div><div class="grow"><h2 style="font-size:18px">Stärke der Vibration</h2></div><span class="val" id="viv">${S.vibInt} von 5</span></div><input type="range" id="vint" min="1" max="5" value="${S.vibInt}" aria-label="Stärke der Vibration"></section>
+  <section class="card tapcard"><button class="tapbtn" id="dtap" aria-label="Drücken">${ic('hand')}</button><div class="ring" aria-hidden="true"><i id="hold"></i></div><h2>Tippe leise oder fest</h2><p class="sub">Kurz = leise. Lange halten = laut.</p></section></div></div>
+  <div class="bottom"><div class="prog"><div class="lab">Hinweis</div><div class="sub">Der Kreis zeigt die Stärke über ${S.map==='both'?'Größe und Helligkeit':S.map==='size'?'die Größe':'die Helligkeit'}.</div></div><button class="btn" id="expl">${ic('compass')}Erkunden</button><button class="btn pri big" id="start">${ic('play')}Start</button></div>`;
+  $('#vint').oninput=e=>{S.vibInt=+e.target.value;$('#viv').textContent=S.vibInt+' von 5';vibrate(3)};
+  $('#expl').onclick=()=>go('explore');$('#start').onclick=()=>S.run?stopAll():startDyn();
+  const b=$('#dtap');b.disabled=!eff().tap;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();dynDown()});['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,dynUp));
+}
+function startDyn(){
+  const D=2400,lead=3000,run={kind:'dy',D,t0:performance.now()+lead,idx:-1,res:[],raf:0,down:null};S.run=run;
+  $('#start').innerHTML=ic('stop')+'Anhalten';$('#dres').innerHTML='';setFb('idle','Los geht es','Warte auf den hervorgehobenen Kreis.','idle');
+  const loop=()=>{
+    if(S.run!==run)return;const now=performance.now(),t=now-run.t0;const L=$('#lead');
+    if(t<0){if(L)L.textContent=Math.ceil(-t/1000)}else{if(L)L.textContent=''}
+    const i=t<0?-1:Math.floor(t/D);
+    if(i!==run.idx){
+      if(run.idx>=0)closeStep(run,run.idx);
+      run.idx=i;
+      if(i>=S.dyn.length){endDyn(run);return}
+      document.querySelectorAll('#circles .ci').forEach((c,k)=>c.classList.toggle('cur',k===i));
+      if(i>=0){$('#dstep').textContent=(i+1)+' / '+S.dyn.length;vibrate(S.dyn[i])}
+    }
+    run.raf=requestAnimationFrame(loop);
+  };run.raf=requestAnimationFrame(loop);
+}
+function dynDown(){const r=S.run;if(!r||r.kind!=='dy'||!eff().tap||r.idx<0)return;if(r.down)return;r.down={t:performance.now(),step:r.idx};const hb=$('#hold');
+  const anim=()=>{if(!r.down||S.run!==r)return;const h=performance.now()-r.down.t;hb.style.width=Math.min(100,h/15)+'%';r.holdRaf=requestAnimationFrame(anim)};anim()}
+function dynUp(){const r=S.run;if(!r||r.kind!=='dy'||!r.down)return;const h=performance.now()-r.down.t,step=r.down.step;r.down=null;cancelAnimationFrame(r.holdRaf);$('#hold').style.width='0';
+  if(r.res[step])return;const level=Math.max(1,Math.min(5,Math.ceil(h/300)));const target=S.dyn[step];const d=level-target;r.res[step]={level,target,d};showDynRes(step)}
+function showDynRes(i){const r=S.run?S.run.res[i]:null;if(!r)return;const kind=r.d===0?'b-ok':Math.abs(r.d)===1?'b-early':'b-miss';const txt=r.d===0?'passt':(Math.abs(r.d)===1?(r.d>0?'fast, etwas zu stark':'fast, etwas zu schwach'):(r.d>0?'viel zu stark':'viel zu schwach'));
+  $('#dres').insertAdjacentHTML('beforeend',`<span class="badge ${kind}">Kreis ${i+1}: ${txt}</span>`);
+  if(r.d===0)setFb('','Passt!','Die Stärke stimmt.','happy');else setFb('early',r.d>0?'Etwas zu stark':'Etwas zu schwach',r.d>0?'Drücke beim nächsten Mal kürzer.':'Drücke beim nächsten Mal länger.','think')}
+function closeStep(run,i){if(!run.res[i]&&eff().tap){run.res[i]={miss:true};$('#dres').insertAdjacentHTML('beforeend',`<span class="badge b-miss">Kreis ${i+1}: verpasst</span>`)}}
+function endDyn(run){S.run=null;cancelAnimationFrame(run.raf);document.querySelectorAll('#circles .ci').forEach(c=>c.classList.remove('cur'));$('#start').innerHTML=ic('play')+'Start';
+  const ok=run.res.filter(r=>r&&r.d===0).length,n=S.dyn.length;
+  if(eff().tap){const pct=Math.round(ok/n*100);setFb(pct>=60?'':'early',pct>=60?'Gut gemacht!':'Weiter üben',`${ok} von ${n} Kreisen mit der richtigen Stärke.`,pct>=60?'happy':'idle');if(S.reduce&&S.rstage<2&&pct>=60){S.rstage++;renderChips()}}
+  else setFb('idle','Fertig','Du hast zugeschaut und gespürt.','idle')}
+
+/* ---------- Erkunden ---------- */
+function viewExplore(){
+  $('#view').innerHTML=`<div class="note"><b>Erkundungsmodus.</b> Hier gibt es keine Aufgabe und keine Bewertung. Probiere aus, was Blöcke, Kreise und Vibration bedeuten.</div>
+  <div class="grid2"><section class="card"><div class="head"><div class="ibox">${ic('drum')}</div><h2>1. Dauer: lang oder kurz</h2></div><p class="sub">Halte den Knopf. Je länger du hältst, desto länger wird der Block.</p>
+    <div class="track" style="grid-template-columns:1fr;min-height:70px;align-items:center"><div id="xblock" class="seg block" style="margin:0;width:48px;height:56px;justify-self:start;transition:none"></div></div>
+    <div class="row"><button class="btn pri" id="xhold" style="touch-action:manipulation;user-select:none">${ic('hand')}Halten</button><span class="val" id="xlab">Noch nichts gedrückt</span></div></section>
+  <section class="card"><div class="head"><div class="ibox">${ic('vib')}</div><h2>2. Stärke: leise bis laut</h2></div><p class="sub">Verschiebe den Regler. Kreis und Vibration ändern sich gemeinsam.</p>
+    <div class="row" style="justify-content:center;min-height:190px;align-items:center" id="xdotw"></div>
+    <div class="sl"><span class="sub">leise</span><input type="range" id="xlev" min="1" max="5" value="3" aria-label="Stärke"><span class="sub">laut</span></div>
+    <button class="btn" id="xfeel">${ic('phone')}Spüren</button></section></div>
+  <section class="card"><h2>Zuordnung</h2><p class="sub">Diese Zuordnung ist ein Vorschlag. Du kannst sie in den Einstellungen ändern.</p><div class="wrapx"><table><thead><tr><th>Konzept</th><th>Sehen</th><th>Tippen</th><th>Vibration</th></tr></thead><tbody>
+  <tr><td>Rhythmus</td><td>Folge von Blöcken, Lücke = Pause</td><td>Mitklopfen im Takt</td><td>ein Impuls je Block</td></tr>
+  <tr><td>Tempo</td><td>Geschwindigkeit des Markers</td><td>Geschwindigkeit des Tippens</td><td>Abstand der Impulse</td></tr>
+  <tr><td>Dynamik</td><td>Größe und Helligkeit eines Kreises</td><td>kurz oder lange drücken</td><td>Stärke des Impulses</td></tr></tbody></table></div></section>`;
+  const xb=$('#xblock'),lab=$('#xlab');let t=null,raf=0;
+  const hb=$('#xhold');const down=e=>{e.preventDefault();t=performance.now();vibrate(3);const f=()=>{if(t===null)return;const h=performance.now()-t;xb.style.width=Math.min(520,48+h/3)+'px';raf=requestAnimationFrame(f)};f()};
+  const up=()=>{if(t===null)return;const h=performance.now()-t;t=null;cancelAnimationFrame(raf);lab.textContent=h>600?'Langer Block ('+(h/1000).toFixed(1)+' s)':'Kurzer Block ('+(h/1000).toFixed(1)+' s)'};
+  hb.addEventListener('pointerdown',down);['pointerup','pointerleave','pointercancel'].forEach(k=>hb.addEventListener(k,up));
+  const draw=()=>{const l=+$('#xlev').value;$('#xdotw').innerHTML=`<div class="ci"><div class="dot" style="${dotStyle(l)}"></div>${sigs(l)}<span class="lv">${LVN[l]}</span></div>`};
+  $('#xlev').oninput=()=>{draw()};$('#xlev').onchange=()=>vibrate(+$('#xlev').value);$('#xfeel').onclick=()=>{vibrate(+$('#xlev').value);toast(eff().vib?(canVib()?'Vibration gesendet':'Dieses Gerät kann nicht vibrieren. Auf dem Handy spürst du es.'):'Vibration ist ausgeschaltet')};draw();
+}
+
+/* ---------- Lehrkraft ---------- */
+function viewTeacher(){
+  const cell={'.':'Pause','X':'Start','o':'weiter'};
+  $('#view').innerHTML=`<div class="note"><b>Lehrkraft-Ansicht.</b> Lege Muster, Tempo und Wiederholungen fest. Die Änderung gilt sofort für die Lernenden.</div>
+  <div class="grid2"><section class="card"><div class="head"><div class="ibox">${ic('note')}</div><h2>Rhythmusmuster</h2></div><p class="sub">Tippe auf ein Feld: Pause, Start eines Blocks, weiter (verlängert den Block).</p>
+  <div class="pat" id="pat">${S.pat.split('').map((c,i)=>`<button class="pcell" data-i="${i}" data-s="${c}" aria-label="Schlag ${i+1}: ${cell[c]}">${cell[c]}</button>`).join('')}</div>
+  <div class="track" id="tprev" style="min-height:64px">${rhythmTrackHTML(S.pat)}</div>
+  <div class="opt"><div class="line"><b>Tempo</b><span class="val" id="tbv">${S.bpm} Schläge pro Minute</span></div><input type="range" id="tbpm" min="40" max="120" step="2" value="${S.bpm}" aria-label="Tempo"></div>
+  <div class="opt"><div class="line"><label for="tcyc"><b>Wiederholungen</b></label><select id="tcyc">${[1,2,3].map(n=>`<option ${S.cycles===n?'selected':''}>${n}</option>`).join('')}</select></div></div></section>
+  <div class="col"><section class="card"><div class="head"><div class="ibox">${ic('vib')}</div><h2>Dynamikfolge</h2></div><p class="sub">Stärke je Kreis von 1 (leise) bis 5 (laut).</p>
+  <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px">${S.dyn.map((l,i)=>`<select data-i="${i}" aria-label="Kreis ${i+1}">${[1,2,3,4,5].map(n=>`<option ${n===l?'selected':''}>${n}</option>`).join('')}</select>`).join('')}</div>
+  <div class="row"><button class="btn pri" id="apply">Für Lernende übernehmen</button></div></section>
+  <section class="card"><h3>Letztes Ergebnis</h3><p class="sub">${S.last?`Rhythmus: ${S.last.ok} von ${S.last.n} Schlägen im Takt (${S.last.pct} %).`:'Noch keine Übung.'}</p></section></div></div>`;
+  $('#pat').querySelectorAll('.pcell').forEach(b=>b.onclick=()=>{const a=S.pat.split('');const i=+b.dataset.i;const c=a[i];const prev=i>0?a[i-1]:'.';a[i]=c==='.'?'X':c==='X'?(prev==='.'?'.':'o'):'.';S.pat=sanitize(a.join(''));viewTeacher()});
+  $('#tbpm').oninput=e=>{S.bpm=+e.target.value;$('#tbv').textContent=S.bpm+' Schläge pro Minute'};
+  $('#tcyc').onchange=e=>{S.cycles=+e.target.value};
+  $('#view').querySelectorAll('select[data-i]').forEach(s=>s.onchange=()=>{S.dyn[+s.dataset.i]=+s.value});
+  $('#apply').onclick=()=>{toast('Übernommen. Die Lernenden sehen das neue Muster.')};
+}
+
+/* ---------- Einstellungen ---------- */
+function viewSettings(){
+  const sw=(id,v,l,d)=>`<div class="opt"><div class="line"><label for="${id}"><b>${l}</b></label><button class="sw" id="${id}" role="switch" aria-checked="${v}"></button></div><span class="sub">${d}</span></div>`;
+  $('#view').innerHTML=`<section class="card"><div class="head"><div class="ibox">${ic('gear')}</div><h2>Einstellungen</h2></div><div class="set">
+  ${sw('s-see',S.ch.see,'Sehen','Grundkanal: Blöcke, Marker und Kreise.')}
+  ${sw('s-tap',S.ch.tap,'Tippen','Du antwortest durch Tippen oder Drücken.')}
+  ${sw('s-vib',S.ch.vib,'Vibration','Impulse auf dem Gerät. '+(canVib()?'Dieses Gerät unterstützt Vibration.':'Dieses Gerät vibriert nicht. Du siehst die Impulse als Symbol.'))}
+  ${sw('s-red',S.reduce,'Reduktionsmodus','Du beginnst nur mit Sehen. Nach einer guten Übung kommt der nächste Kanal dazu: Tippen, dann Vibration.')}
+  <div class="opt"><div class="line"><label for="s-int"><b>Stärke der Vibration</b></label><span class="val" id="s-intv">${S.vibInt} von 5</span></div><input type="range" id="s-int" min="1" max="5" value="${S.vibInt}"><span class="sub">Stelle sie so ein, dass sie angenehm ist.</span></div>
+  <div class="opt"><div class="line"><label for="s-map"><b>Dynamik zeigen über</b></label><select id="s-map"><option value="both">Größe und Helligkeit</option><option value="size">nur Größe</option><option value="bright">nur Helligkeit</option></select></div></div>
+  ${sw('s-mas',S.mascot,'Maskottchen','Es reagiert nur mit Bild und Text. Es spricht nicht und macht keine Geräusche.')}
+  </div><div class="row"><button class="btn" id="s-reset">Reduktionsmodus neu starten</button><button class="btn" id="s-prog">Fortschritt zurücksetzen</button></div></section>`;
+  $('#s-map').value=S.map;
+  const bind=(id,fn)=>$('#'+id).onclick=e=>{const b=e.currentTarget;const v=b.getAttribute('aria-checked')!=='true';b.setAttribute('aria-checked',v);fn(v);renderChips()};
+  bind('s-see',v=>S.ch.see=v);bind('s-tap',v=>S.ch.tap=v);bind('s-vib',v=>S.ch.vib=v);bind('s-red',v=>{S.reduce=v;S.rstage=0});bind('s-mas',v=>S.mascot=v);
+  $('#s-int').oninput=e=>{S.vibInt=+e.target.value;$('#s-intv').textContent=S.vibInt+' von 5';vibrate(3)};
+  $('#s-map').onchange=e=>S.map=e.target.value;
+  $('#s-reset').onclick=()=>{S.rstage=0;renderChips();toast('Stufe 1: nur Sehen')};
+  $('#s-prog').onclick=()=>{S.done=[false,false,false,false];saveDone();toast('Fortschritt zurückgesetzt')};
+}
+
+/* ---------- Steuerung ---------- */
+function stopAll(){const r=S.run;if(!r)return;cancelAnimationFrame(r.raf);cancelAnimationFrame(r.holdRaf);S.run=null;const b=$('#start');if(b)b.innerHTML=ic('play')+'Start';const m=$('#mk');if(m)m.hidden=true;const l=$('#lead');if(l)l.textContent=''}
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&S.run&&S.run.kind==='rh'&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();if(!e.repeat)rhythmTap()}});
+document.addEventListener('keyup',e=>{if(e.code==='Space'&&S.run&&S.run.kind==='rh'&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))e.preventDefault()});
+go('home');
+})();
+</script>
+
+</body></html>
